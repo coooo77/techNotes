@@ -1,5 +1,6 @@
 node_modules
 dist/*.js
 dist/**/*.js
+dist/logs
 !dist/public/
 package-lock.json
