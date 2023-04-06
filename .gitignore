@@ -4,3 +4,4 @@ dist/**/*.js
 dist/logs
 !dist/public/
 package-lock.json
+.env

@@ -1,24 +1,32 @@
+// external methods
 import path from 'path'
-import express from 'express'
-import root from './routes/root'
 import cors from 'cors'
-import corsOptions from './config/corsOptions'
+import dotenv from 'dotenv'
+import express from 'express'
+import mongoose from 'mongoose'
 import cookieParser from 'cookie-parser'
 
+// internal methods
+import root from './routes/root'
+import { connectDB } from './config/dbConn'
+import corsOptions from './config/corsOptions'
+
 // middleware
-import { logger } from './middleware/logger'
+import { logger, logEvents } from './middleware/logger'
+import { errorHandler } from './middleware/errorHandler'
 
+dotenv.config({
+  path: path.join(__dirname, '..', '.env'),
+})
 const app = express()
-
+connectDB()
 const PORT = process.env.PORT || 3500
 
 app.use(logger)
-
 app.use(cors(corsOptions))
-
 app.use(express.json())
-
 app.use(cookieParser())
+app.use(errorHandler)
 
 /**
  * 這個路徑是相對於index.js，所以寫成
@@ -47,4 +55,13 @@ app.all('*', (req, res) => {
   }
 })
 
-app.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`))
+mongoose.connection.once('open', () => {
+  console.log('Connected to MongoDB')
+  app.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`))
+})
+
+mongoose.connection.on('error', (err) => {
+  console.log('MongoDB connection error:', err)
+  const errorMsg = `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`
+  logEvents(errorMsg, 'mongoErrLog.log')
+})
