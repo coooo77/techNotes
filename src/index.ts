@@ -7,13 +7,17 @@ import mongoose from 'mongoose'
 import cookieParser from 'cookie-parser'
 
 // internal methods
-import root from './routes/root'
 import { connectDB } from './config/dbConn'
 import corsOptions from './config/corsOptions'
 
 // middleware
 import { logger, logEvents } from './middleware/logger'
 import { errorHandler } from './middleware/errorHandler'
+
+// routes
+import root from './routes/root'
+import userRoutes from './routes/userRoutes'
+import noteRoutes from './routes/noteRoutes'
 
 dotenv.config({
   path: path.join(__dirname, '..', '.env'),
@@ -36,6 +40,8 @@ app.use(errorHandler)
 app.use('/', express.static(path.join(__dirname, 'public')))
 
 app.use('/', root)
+app.use('/users', userRoutes)
+app.use('/notes', noteRoutes)
 
 app.all('*', (req, res) => {
   res.status(404)
