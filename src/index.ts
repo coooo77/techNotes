@@ -18,6 +18,7 @@ import { errorHandler } from './middleware/errorHandler'
 import root from './routes/root'
 import userRoutes from './routes/userRoutes'
 import noteRoutes from './routes/noteRoutes'
+import authRoutes from './routes/authRoutes'
 
 dotenv.config({
   path: path.join(__dirname, '..', '.env'),
@@ -40,6 +41,7 @@ app.use(errorHandler)
 app.use('/', express.static(path.join(__dirname, 'public')))
 
 app.use('/', root)
+app.use('/auth', authRoutes)
 app.use('/users', userRoutes)
 app.use('/notes', noteRoutes)
 
