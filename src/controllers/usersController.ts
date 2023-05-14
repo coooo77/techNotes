@@ -1,9 +1,10 @@
 import bcrypt from 'bcrypt'
-import asyncHandler from 'express-async-handler'
 
 // models
 import User from '../models/User'
 import Note from '../models/Note'
+
+import type { Request, Response } from 'express'
 
 export default {
   /**
@@ -13,7 +14,7 @@ export default {
    *
    * @access Private
    */
-  getAllUsers: asyncHandler(async (req, res) => {
+  getAllUsers: async (req: Request, res: Response) => {
     const users = await User.find().select('-password').lean()
 
     if (!users.length) {
@@ -21,7 +22,7 @@ export default {
     } else {
       res.json(users)
     }
-  }),
+  },
 
   /**
    * @description Create new user
@@ -30,7 +31,7 @@ export default {
    *
    * @access Private
    */
-  createNewUser: asyncHandler(async (req, res) => {
+  createNewUser: async (req: Request, res: Response) => {
     const { username, password, roles } = req.body
 
     if (!username) {
@@ -43,19 +44,17 @@ export default {
       return
     }
 
-    if (!Array.isArray(roles) || !roles.length) {
-      res.status(400).json({ message: 'roles is required' })
-      return
-    }
-
-    const duplicate = await User.findOne({ username }).lean().exec()
+    const duplicate = await User.findOne({ username }).collation({ locale: 'en', strength: 2 }).lean().exec()
     if (duplicate) {
       res.status(409).json({ message: 'Duplicate username' })
       return
     }
 
     const hashedPwd = await bcrypt.hash(password, 10)
-    const userObj = { username, password: hashedPwd, roles }
+    // prettier-ignore
+    const userObj = !Array.isArray(roles) || !roles.length
+      ? { username, password: hashedPwd }
+      : { username, password: hashedPwd, roles }
     const user = await User.create(userObj)
 
     if (user) {
@@ -63,7 +62,7 @@ export default {
     } else {
       res.status(400).json({ message: 'Invalid user data received' })
     }
-  }),
+  },
 
   /**
    * @description Update a user
@@ -72,7 +71,7 @@ export default {
    *
    * @access Private
    */
-  updateUser: asyncHandler(async (req, res) => {
+  updateUser: async (req: Request, res: Response) => {
     const { id, username, roles, active, password } = req.body
 
     if (!id) {
@@ -106,7 +105,7 @@ export default {
       return
     }
 
-    const duplicate = await User.findOne({ username }).lean().exec()
+    const duplicate = await User.findOne({ username }).collation({ locale: 'en', strength: 2 }).lean().exec()
     if (duplicate && duplicate?._id.toString() !== id) {
       res.status(409).json({ message: 'Duplicate username' })
       return
@@ -122,7 +121,7 @@ export default {
 
     const updatedUser = await user.save()
     res.json({ message: `${updatedUser.username} updated` })
-  }),
+  },
 
   /**
    * @description Delete a user
@@ -131,7 +130,7 @@ export default {
    *
    * @access Private
    */
-  deleteUser: asyncHandler(async (req, res) => {
+  deleteUser: async (req: Request, res: Response) => {
     const { id } = req.body
     if (!id) {
       res.status(400).json({ message: 'User ID Required' })
@@ -153,5 +152,5 @@ export default {
     const result = await user.deleteOne()
     const reply = `Username ${result.username} with ID ${result._id} deleted`
     res.json(reply)
-  }),
+  },
 }

@@ -1,11 +1,11 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import asyncHandler from 'express-async-handler'
 
 // models
 import User from '../models/User'
 
 import type { JwtPayload } from 'jsonwebtoken'
+import type { Request, Response } from 'express'
 
 export default {
   /**
@@ -15,7 +15,7 @@ export default {
    *
    * @access Public
    */
-  login: asyncHandler(async (req, res) => {
+  login: async (req: Request, res: Response) => {
     const keys = ['username', 'password']
     for (const key of keys) {
       if (req.body[key]) continue
@@ -61,7 +61,7 @@ export default {
 
     // Send accessToken containing username and roles
     res.json({ accessToken })
-  }),
+  },
 
   /**
    * @description Refresh
@@ -70,7 +70,7 @@ export default {
    *
    * @access Public - because access token has expired
    */
-  refresh: asyncHandler(async (req, res) => {
+  refresh: async (req: Request, res: Response) => {
     const refreshToken = req.cookies?.jwt as string
 
     if (!refreshToken) {
@@ -100,7 +100,7 @@ export default {
 
       res.json({ accessToken })
     })
-  }),
+  },
 
   /**
    * @description Logout
@@ -109,7 +109,7 @@ export default {
    *
    * @access Public - just to clear cookie if exists
    */
-  logout: asyncHandler(async (req, res) => {
+  logout: async (req: Request, res: Response) => {
     const refreshToken = req.cookies?.jwt as string
     if (!refreshToken) {
       res.sendStatus(204)
@@ -118,5 +118,5 @@ export default {
 
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
     res.json({ message: 'Cookie cleared' })
-  }),
+  },
 }

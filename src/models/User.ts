@@ -16,12 +16,10 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: true,
   },
-  roles: [
-    {
-      type: String,
-      default: 'Employee',
-    },
-  ],
+  roles: {
+    type: [String],
+    default: ['Employee'],
+  },
   active: {
     type: Boolean,
     default: true,

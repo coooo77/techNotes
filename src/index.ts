@@ -3,6 +3,7 @@ import path from 'path'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
+import 'express-async-errors'
 import mongoose from 'mongoose'
 import cookieParser from 'cookie-parser'
 

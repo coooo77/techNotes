@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
-import asyncHandler from 'express-async-handler'
 
+import type { Request, Response, NextFunction } from 'express'
 import type { JwtPayload } from 'jsonwebtoken'
 
-export default asyncHandler(async (req, res, next) => {
+export default async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = (req.headers.authorization || req.headers.Authorization) as string
 
   if (!authHeader?.startsWith('Bearer ')) {
@@ -39,4 +39,4 @@ export default asyncHandler(async (req, res, next) => {
 
     next()
   })
-})
+}

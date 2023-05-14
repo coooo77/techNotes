@@ -1,8 +1,8 @@
-import asyncHandler from 'express-async-handler'
-
 // models
 import User from '../models/User'
 import Note from '../models/Note'
+
+import type { Request, Response } from 'express'
 
 export default {
   /**
@@ -12,7 +12,7 @@ export default {
    *
    * @access Private
    */
-  getAllNotes: asyncHandler(async (req, res) => {
+  getAllNotes: async (req: Request, res: Response) => {
     const notes = await Note.find().lean()
 
     if (!notes?.length) {
@@ -27,7 +27,7 @@ export default {
       })
     )
     res.json(notesWithUser)
-  }),
+  },
 
   /**
    * @description Create new note
@@ -36,7 +36,7 @@ export default {
    *
    * @access Private
    */
-  createNewNote: asyncHandler(async (req, res) => {
+  createNewNote: async (req: Request, res: Response) => {
     const { user, title, text } = req.body
 
     if (!user) {
@@ -61,7 +61,7 @@ export default {
     } else {
       res.status(400).json({ message: 'Invalid note data received' })
     }
-  }),
+  },
 
   /**
    * @description Update a note
@@ -70,7 +70,7 @@ export default {
    *
    * @access Private
    */
-  updateNote: asyncHandler(async (req, res) => {
+  updateNote: async (req: Request, res: Response) => {
     const { id, user, title, text, completed } = req.body
 
     if (!id) {
@@ -104,7 +104,7 @@ export default {
       return
     }
 
-    const duplicate = await Note.findOne({ title }).lean().exec()
+    const duplicate = await Note.findOne({ title }).collation({ locale: 'en', strength: 2 }).lean().exec()
     if (duplicate && duplicate?._id.toString() !== id) {
       res.status(409).json({ message: 'Duplicate note title' })
       return
@@ -117,7 +117,7 @@ export default {
 
     const updatedNote = await note.save()
     res.json(`'${updatedNote.title}' updated`)
-  }),
+  },
 
   /**
    * @description Delete a note
@@ -126,7 +126,7 @@ export default {
    *
    * @access Private
    */
-  deleteNote: asyncHandler(async (req, res) => {
+  deleteNote: async (req: Request, res: Response) => {
     const { id } = req.body
     if (!id) {
       res.status(400).json({ message: 'Note ID required' })
@@ -142,5 +142,5 @@ export default {
     const result = await note.deleteOne()
     const reply = `Note '${result.title}' with ID ${result._id} deleted`
     res.json(reply)
-  }),
+  }
 }
